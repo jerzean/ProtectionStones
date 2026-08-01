@@ -7,3 +7,5 @@
 /.project
 /dependency-reduced-pom.xml
 /*.iml
+/dev.zip
+/src.zip

@@ -22,7 +22,6 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dev.espi.protectionstones.commands.ArgHelp;
 import dev.espi.protectionstones.commands.PSCommandArg;
-import dev.espi.protectionstones.gui.GuiManager;
 import dev.espi.protectionstones.placeholders.PSPlaceholderExpansion;
 import dev.espi.protectionstones.utils.BlockUtil;
 import dev.espi.protectionstones.utils.RecipeUtil;
@@ -61,7 +60,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ProtectionStones extends JavaPlugin {
     // change this when the config version goes up
-    public static final int CONFIG_VERSION = 19;
+    public static final int CONFIG_VERSION = 16;
 
     private boolean debug = false;
 
@@ -72,9 +71,6 @@ public class ProtectionStones extends JavaPlugin {
     private static ProtectionStones plugin;
 
     private PSEconomy economy;
-
-    // Inventory GUI manager (used when gui.* config toggles are enabled)
-    private GuiManager guiManager;
 
     // all configuration file options are stored in here
     private PSConfig configOptions;
@@ -181,10 +177,6 @@ public class ProtectionStones extends JavaPlugin {
      */
     public PSConfig getConfigOptions() {
         return configOptions;
-    }
-
-    public GuiManager getGuiManager() {
-        return guiManager;
     }
 
     /**
@@ -563,11 +555,6 @@ public class ProtectionStones extends JavaPlugin {
         Config.setInsertionOrderPreserved(true); // make sure that config upgrades aren't a complete mess
 
         plugin = this;
-
-        // GUI manager (safe to register even if GUIs are disabled via config)
-        guiManager = new GuiManager(this);
-        guiManager.register();
-
         configLocation = new File(this.getDataFolder() + "/config.toml");
         blockDataFolder = new File(this.getDataFolder() + "/blocks");
 
@@ -672,13 +659,6 @@ public class ProtectionStones extends JavaPlugin {
             LegacyUpgrade.upgradeRegionsWithNegativeYValues();
 
         getLogger().info(ChatColor.WHITE + "ProtectionStones has successfully started!");
-    }
-
-    @Override
-    public void onDisable() {
-        if (guiManager != null) {
-            guiManager.unregister();
-        }
     }
 
 }

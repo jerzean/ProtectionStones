@@ -16,8 +16,6 @@
 package dev.espi.protectionstones.commands;
 
 import dev.espi.protectionstones.*;
-import dev.espi.protectionstones.gui.screens.common.LoadingGui;
-import dev.espi.protectionstones.gui.screens.regions.RegionListGui;
 import dev.espi.protectionstones.utils.ChatUtil;
 import dev.espi.protectionstones.utils.UUIDCache;
 import org.bukkit.Bukkit;
@@ -63,24 +61,6 @@ public class ArgTp implements PSCommandArg {
         // preliminary checks
         if (!p.hasPermission("protectionstones.tp"))
             return PSL.msg(p, PSL.NO_PERMISSION_TP.msg());
-
-        // GUI mode: /ps tp (no args) -> list your regions and teleport
-        if (args.length == 1) {
-            var cfg = ProtectionStones.getInstance().getConfigOptions();
-            if (Boolean.TRUE.equals(cfg.guiEnabled) && Boolean.TRUE.equals(cfg.guiCommandTp)) {
-                var gm = ProtectionStones.getInstance().getGuiManager();
-                gm.open(p, new LoadingGui(gm, "Teleport"));
-
-                PSPlayer psp = PSPlayer.fromPlayer(p);
-                Bukkit.getScheduler().runTaskAsynchronously(ProtectionStones.getInstance(), () -> {
-                    List<PSRegion> regions = psp.getPSRegionsCrossWorld(p.getWorld(), false);
-                    Bukkit.getScheduler().runTask(ProtectionStones.getInstance(), () ->
-                            gm.open(p, new RegionListGui(gm, RegionListGui.Mode.TELEPORT, "Teleport", regions, 0, null))
-                    );
-                });
-                return true;
-            }
-        }
 
         if (args.length < 2 || args.length > 3)
             return PSL.msg(p, PSL.TP_HELP.msg());
@@ -147,7 +127,7 @@ public class ArgTp implements PSCommandArg {
         return null;
     }
 
-    public static void teleportPlayer(Player p, PSRegion r) {
+    static void teleportPlayer(Player p, PSRegion r) {
         if (r.getTypeOptions() == null) {
             PSL.msg(p, ChatColor.RED + "This region is problematic, and the block type (" + r.getType() + ") is not configured. Please contact an administrator.");
             Bukkit.getLogger().info(ChatColor.RED + "This region is problematic, and the block type (" + r.getType() + ") is not configured.");
@@ -166,7 +146,7 @@ public class ArgTp implements PSCommandArg {
             Bukkit.getScheduler().runTaskLater(ProtectionStones.getInstance(), () -> {
                 PSL.msg(p, PSL.TPING.msg());
                 p.teleport(r.getHome());
-            }, 20 * r.getTypeOptions().tpWaitingSeconds);
+            }, 20L * r.getTypeOptions().tpWaitingSeconds);
 
         } else {// delay and not allowed to move
             PSL.msg(p, PSL.TP_IN_SECONDS.msg().replace("%seconds%", "" + r.getTypeOptions().tpWaitingSeconds));
